@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Escala de Máquinas</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--text:#1d2330;--muted:#5d6678;--accent:#2563eb;--off:#fde8c8;--offt:#8a4b00;--cur:#e6efff;--border:#e2e5ea;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12151c;--card:#1b2029;--text:#e8eaf0;--muted:#9aa3b5;--accent:#6b9bff;--off:#4a3412;--offt:#ffd9a0;--cur:#20304f;--border:#2a3040}}
+:root[data-theme="dark"]{--bg:#12151c;--card:#1b2029;--text:#e8eaf0;--muted:#9aa3b5;--accent:#6b9bff;--off:#4a3412;--offt:#ffd9a0;--cur:#20304f;--border:#2a3040}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+main{max-width:960px;margin:0 auto;padding:22px 14px 48px}
+h1{margin:0 0 4px;font-size:1.6rem}
+h2{font-size:1.05rem;margin:0 0 10px}
+.sub{color:var(--muted);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px}
+.names{display:grid;gap:8px}
+.prow{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:8px}
+input,select,button{width:100%;padding:9px 10px;font-size:.95rem;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text)}
+.top select{background:var(--card);font-weight:600}
+button{width:auto;cursor:pointer;margin-top:12px}
+label{font-size:.8rem;color:var(--muted)}
+.fld{margin-bottom:12px;max-width:300px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th,td{padding:10px 8px;text-align:center;border-bottom:1px solid var(--border);font-size:.92rem}
+th{font-size:.78rem;text-transform:uppercase;letter-spacing:.03em;color:var(--muted)}
+tr.cur td{background:var(--cur)}
+td.off{background:var(--off);color:var(--offt);font-weight:600}
+td.me{outline:2px solid var(--accent);outline-offset:-2px;font-weight:700}
+.tag{font-size:.7rem;background:var(--accent);color:#fff;border-radius:999px;padding:1px 7px;margin-left:6px;vertical-align:middle}
+.note{color:var(--muted);font-size:.82rem;margin:10px 0 0}
+.rodape{text-align:center;color:var(--muted);font-size:.85rem;margin-top:24px}
+</style>
+</head>
+<body>
+<main>
+<h1>🏭 Escala de Máquinas</h1>
+<p class="sub">6 pessoas · 5 máquinas · 1 fora da máquina por semana · Nov/2026 a Dez/2027</p>
+
+<div class="fld top"><label for="mes">Mês</label><select id="mes"></select></div>
+
+<div class="card">
+<h2>Equipe: nome e máquina na semana</h2>
+<div class="fld"><label for="semana">Semana</label><select id="semana"></select></div>
+<div class="names" id="names"></div>
+
+<div style="margin-top:12px;max-width:260px">
+<label for="eu">Quem é você? (destaca na tabela)</label>
+<select id="eu"></select>
+</div>
+<button id="reset" type="button">Restaurar escala original</button>
+</div>
+
+<div class="card">
+<h2 id="titulo">Escala semanal</h2>
+<div class="scroll"><table>
+<thead><tr><th>Semana</th><th>Máq. 1</th><th>Máq. 2</th><th>Máq. 3</th><th>Máq. 4</th><th>Avalanche</th><th>Fora da Máquina</th></tr></thead>
+<tbody id="corpo"></tbody>
+</table></div>
+
+</div>
+<footer class="rodape">Criado por Lucas Oliveira</footer>
+</main>
+<script>
+var NOMES_MES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+var maqs=['Máq. 1','Máq. 2','Máq. 3','Máq. 4','Avalanche','Fora da máquina'];
+var padrao=['Lucas','Michelle','Claudio','Alex','Alexandre','Alice'];
+function p2(n){return (n<10?'0':'')+n;}
+function fmt(d){return p2(d.getDate())+'/'+p2(d.getMonth()+1);}
+
+// Semanas (segunda a sábado) de 02/11/2026 até a última segunda de dez/2027
+var semanas=[];
+for(var g=0;g<61;g++){
+var d=new Date(2026,10,2+7*g);
+var sab=new Date(d.getFullYear(),d.getMonth(),d.getDate()+5);
+var dom=new Date(d.getFullYear(),d.getMonth(),d.getDate()+6);
+semanas.push({g:g,ini:d.getTime(),fim:dom.getTime(),mes:d.getFullYear()*12+d.getMonth(),txt:fmt(d)+' a '+fmt(sab)});
+}
+// Rodízio: índices 0 Lucas, 1 Michelle, 2 Claudio, 3 Alex, 4 Alexandre, 5 Alice | [M1,M2,M3,M4,Avalanche,Fora]
+// Quem está fora entra na Máq. 1; todos avançam uma máquina; quem estava na Avalanche fica fora.
+function proxima(e){return [e[5],e[0],e[1],e[2],e[3],e[4]];}
+var base=[[3,1,0,5,2,4]];
+for(var k=1;k<61;k++)base.push(proxima(base[k-1]));
+
+var meses=[];
+semanas.forEach(function(s){if(meses.indexOf(s.mes)<0)meses.push(s.mes);});
+function nomeMes(m){return NOMES_MES[m%12]+' '+Math.floor(m/12);}
+function semanasDoMes(m){return semanas.filter(function(s){return s.mes===m;});}
+
+var nomes=padrao.slice();
+var ajustes={};
+var eu=0;
+try{var s1=localStorage.getItem('nomes-escala');if(s1){var a=JSON.parse(s1);if(a&&a.length===6)nomes=a;}}catch(e){}
+try{var s2=localStorage.getItem('ajustes-v3');if(s2){var b=JSON.parse(s2);if(b&&typeof b==='object')ajustes=b;}}catch(e){}
+try{var s3=localStorage.getItem('eu-escala');if(s3!==null)eu=parseInt(s3,10)||0;}catch(x){}
+
+function getEscala(g){return ajustes[g]||base[g];}
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]});}
+function salvar(){try{localStorage.setItem('nomes-escala',JSON.stringify(nomes));localStorage.setItem('ajustes-v3',JSON.stringify(ajustes));localStorage.setItem('eu-escala',String(eu));}catch(e){}}
+
+function atual(){
+var h=new Date(),t=new Date(h.getFullYear(),h.getMonth(),h.getDate()).getTime();
+for(var i=0;i<semanas.length;i++){if(t>=semanas[i].ini&&t<=semanas[i].fim)return semanas[i].g;}
+return -1;
+}
+var cur=atual();
+var mesSel=cur>=0?semanas[cur].mes:meses[0];
+var semSel=cur>=0?cur:semanasDoMes(mesSel)[0].g;
+
+function opcoes(lista,sel){return lista.map(function(t,i){return '<option value="'+i+'"'+(i===sel?' selected':'')+'>'+esc(t)+'</option>';}).join('');}
+
+function desenhaMes(){
+var sm=document.getElementById('mes');
+sm.innerHTML=meses.map(function(m){return '<option value="'+m+'"'+(m===mesSel?' selected':'')+'>'+esc(nomeMes(m))+'</option>';}).join('');
+}
+function desenhaSemana(){
+var lista=semanasDoMes(mesSel),ss=document.getElementById('semana');
+ss.innerHTML=lista.map(function(s,i){return '<option value="'+s.g+'"'+(s.g===semSel?' selected':'')+'>Semana '+(i+1)+' ('+esc(s.txt)+')</option>';}).join('');
+}
+function desenhaNomes(){
+var box=document.getElementById('names');box.innerHTML='';
+nomes.forEach(function(n,i){
+var row=document.createElement('div');row.className='prow';
+var inp=document.createElement('input');inp.value=n;inp.setAttribute('aria-label','Nome '+(i+1));
+inp.addEventListener('input',function(){nomes[i]=inp.value||padrao[i];salvar();desenhaTabela();desenhaSelect();});
+var sm=document.createElement('select');sm.setAttribute('aria-label','Máquina de '+n);
+sm.innerHTML=opcoes(maqs,getEscala(semSel).indexOf(i));
+sm.addEventListener('change',function(){
+var linha=getEscala(semSel).slice(),novo=parseInt(sm.value,10),velho=linha.indexOf(i),outro=linha[novo];
+linha[novo]=i;linha[velho]=outro;
+ajustes[semSel]=linha;
+salvar();desenhaNomes();desenhaTabela();
+});
+row.appendChild(inp);row.appendChild(sm);
+box.appendChild(row);
+});
+}
+function desenhaSelect(){
+var sel=document.getElementById('eu');sel.innerHTML='';
+nomes.forEach(function(n,i){var o=document.createElement('option');o.value=i;o.textContent=n;if(i===eu)o.selected=true;sel.appendChild(o);});
+}
+function desenhaTabela(){
+var html='';
+document.getElementById('titulo').textContent='Escala semanal – '+nomeMes(mesSel);
+semanasDoMes(mesSel).forEach(function(sm,idx){
+var e=getEscala(sm.g),folga=e[5],op=e.slice(0,5),agora=(sm.g===cur);
+html+='<tr'+(agora?' class="cur"':'')+'><td><b>Sem. '+(idx+1)+'</b><br><span style="color:var(--muted);font-size:.8rem">'+esc(sm.txt)+'</span>'+(agora?'<span class="tag">agora</span>':'')+'</td>';
+op.forEach(function(p){html+='<td'+(p===eu?' class="me"':'')+'>'+esc(nomes[p])+'</td>';});
+html+='<td class="off'+(folga===eu?' me':'')+'">'+esc(nomes[folga])+'</td></tr>';
+});
+document.getElementById('corpo').innerHTML=html;
+}
+document.getElementById('mes').addEventListener('change',function(ev){
+mesSel=parseInt(ev.target.value,10);
+var l=semanasDoMes(mesSel);
+semSel=(cur>=0&&semanas[cur].mes===mesSel)?cur:l[0].g;
+desenhaSemana();desenhaNomes();desenhaTabela();
+});
+document.getElementById('semana').addEventListener('change',function(ev){semSel=parseInt(ev.target.value,10);desenhaNomes();});
+document.getElementById('eu').addEventListener('change',function(ev){eu=parseInt(ev.target.value,10);salvar();desenhaTabela();});
+document.getElementById('reset').addEventListener('click',function(){ajustes={};salvar();desenhaNomes();desenhaTabela();});
+desenhaMes();desenhaSemana();desenhaNomes();desenhaSelect();desenhaTabela();
+</script>
+</body>
+</html>

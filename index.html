@@ -44,6 +44,8 @@ td.me{outline:2px solid var(--accent);outline-offset:-2px;font-weight:700}
 .pa{margin:0 8px 6px 0}
 .ghbox{display:grid;gap:6px;margin-top:10px;max-width:420px}
 .ghbox button{margin-top:6px}
+.ghbox textarea{width:100%;min-height:90px;font-size:.72rem;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);padding:8px}
+.ghbox a{color:var(--accent)}
 summary{cursor:pointer;font-size:.92rem}
 </style>
 </head>
@@ -61,14 +63,24 @@ summary{cursor:pointer;font-size:.92rem}
 <div class="picker" id="picker"></div>
 <input type="file" id="arq" accept="image/*" style="display:none">
 <input type="file" id="arqgh" accept="image/*" style="display:none">
-<details style="margin-top:12px"><summary>⚙️ Conectar ao GitHub (salvar avatares para todos)</summary>
+<details style="margin-top:12px"><summary>🔒 Acesso ao GitHub (login e senha)</summary>
 <div class="ghbox">
-<label for="ghowner">Usuário ou organização</label><input id="ghowner" autocomplete="off">
+<label for="glogin">Login</label><input id="glogin" autocomplete="username">
+<label for="gsenha">Senha</label><input id="gsenha" type="password" autocomplete="current-password">
+<div><button type="button" id="gabrir">Desbloquear</button><button type="button" id="gfechar" style="margin-left:8px">Bloquear</button></div>
+<p class="note" id="ghcfgmsg"></p>
+<details><summary>Criar ou trocar o cofre (administrador)</summary>
+<div class="ghbox">
+<label for="ghowner">Usuário ou organização do GitHub</label><input id="ghowner" autocomplete="off">
 <label for="ghrepo">Repositório</label><input id="ghrepo" autocomplete="off">
 <label for="ghtoken">Token de acesso</label><input id="ghtoken" type="password" autocomplete="off" placeholder="github_pat_...">
-<div><button type="button" id="ghsalvar">Salvar</button><button type="button" id="ghlimpar" style="margin-left:8px">Remover token</button></div>
-<p class="note" id="ghcfgmsg"></p>
-<p class="note">Como gerar o token: GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token. Em "Repository access" escolha só este repositório e, em Permissions, deixe Contents como "Read and write". O token fica salvo apenas neste navegador. Não compartilhe: quem o tiver pode alterar os arquivos do repositório.</p>
+<label for="gnlogin">Novo login</label><input id="gnlogin" autocomplete="off">
+<label for="gnsenha">Nova senha (mínimo 12 caracteres)</label><input id="gnsenha" type="password" autocomplete="new-password">
+<div><button type="button" id="ggerar">Gerar cofre</button></div>
+<textarea id="gout" readonly style="display:none"></textarea>
+<a id="gdl" download="cofre.json" style="display:none">⬇ Baixar cofre.json</a>
+<p class="note">Envie o cofre.json para a raiz do repositório, junto do index.html. O token fica criptografado e só abre com este login e esta senha.</p>
+</div></details>
 </div></details>
 <div style="margin-top:12px;max-width:260px">
 <label for="eu">Quem é você? (destaca na tabela)</label>
@@ -160,7 +172,7 @@ var fotos={};
 var avs=avsPadrao.slice();
 var repo={};
 var gh={owner:'',repo:'',token:''};
-try{var g0=localStorage.getItem('gh-config');if(g0){var g1=JSON.parse(g0);if(g1&&typeof g1==='object'){gh.owner=g1.owner||'';gh.repo=g1.repo||'';gh.token=g1.token||'';}}}catch(e){}
+try{localStorage.removeItem('gh-config');}catch(e){}
 try{if(!gh.owner&&/\.github\.io$/.test(location.hostname)){gh.owner=location.hostname.split('.')[0];var seg=location.pathname.split('/')[1];gh.repo=(seg&&seg.indexOf('.')<0)?seg:(gh.owner+'.github.io');}}catch(e){}
 var eu=0;
 var pickerSel=-1;
@@ -239,7 +251,7 @@ b.addEventListener('click',function(){avs[i]=parseInt(b.getAttribute('data-k'),1
 });
 document.getElementById('pauto').addEventListener('click',function(){avs[i]=null;salvar();desenhaNomes();desenhaTabela();desenhaPicker();});
 document.getElementById('pini').addEventListener('click',function(){avs[i]='ini';salvar();desenhaNomes();desenhaTabela();desenhaPicker();});
-document.getElementById('pgh').addEventListener('click',function(){if(!gh.owner||!gh.repo||!gh.token){ghm('Configure o GitHub primeiro: abra "Conectar ao GitHub", logo abaixo.');return;}document.getElementById('arqgh').click();});
+document.getElementById('pgh').addEventListener('click',function(){if(!gh.owner||!gh.repo||!gh.token){ghm('Desbloqueie o GitHub primeiro: abra "Acesso ao GitHub", logo abaixo, e entre com login e senha.');return;}document.getElementById('arqgh').click();});
 document.getElementById('pfoto').addEventListener('click',function(){document.getElementById('arq').click();});
 document.getElementById('pfim').addEventListener('click',function(){pickerSel=-1;desenhaPicker();});
 }
@@ -326,24 +338,54 @@ var f=ev.target.files&&ev.target.files[0];
 if(!f||pickerSel<0)return;
 ghEnviar(pickerSel,f);
 });
+function b64(buf){var s='',a=new Uint8Array(buf);for(var i=0;i<a.length;i++)s+=String.fromCharCode(a[i]);return btoa(s);}
+function unb64(s){var b=atob(s),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a;}
+function chave(login,senha,salt,iter){
+return crypto.subtle.importKey('raw',new TextEncoder().encode(login.trim().toLowerCase()+'\u0000'+senha),'PBKDF2',false,['deriveKey']).then(function(km){
+return crypto.subtle.deriveKey({name:'PBKDF2',salt:salt,iterations:iter,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+});
+}
+function cm(t){document.getElementById('ghcfgmsg').textContent=t;}
 document.getElementById('ghowner').value=gh.owner;
 document.getElementById('ghrepo').value=gh.repo;
-document.getElementById('ghtoken').placeholder=gh.token?'Token salvo (deixe em branco para manter)':'github_pat_...';
-document.getElementById('ghsalvar').addEventListener('click',function(){
-gh.owner=document.getElementById('ghowner').value.trim();
-gh.repo=document.getElementById('ghrepo').value.trim();
-var t=document.getElementById('ghtoken').value.trim();
-if(t)gh.token=t;
-document.getElementById('ghtoken').value='';
-try{localStorage.setItem('gh-config',JSON.stringify(gh));}catch(e){}
-document.getElementById('ghtoken').placeholder=gh.token?'Token salvo (deixe em branco para manter)':'github_pat_...';
-document.getElementById('ghcfgmsg').textContent=(gh.owner&&gh.repo&&gh.token)?'Conectado. Agora use "Salvar no GitHub" no seletor de avatar.':'Preencha usuário, repositório e token.';
+document.getElementById('ggerar').addEventListener('click',function(){
+var o=document.getElementById('ghowner').value.trim(),r=document.getElementById('ghrepo').value.trim(),t=document.getElementById('ghtoken').value.trim(),lg=document.getElementById('gnlogin').value.trim(),sn=document.getElementById('gnsenha').value;
+if(!o||!r||!t||!lg||!sn){cm('Preencha usuário, repositório, token, novo login e nova senha.');return;}
+if(sn.length<12){cm('Use uma senha com pelo menos 12 caracteres.');return;}
+if(!(window.crypto&&crypto.subtle)){cm('Este navegador não permite criptografia aqui. Use a página em https.');return;}
+cm('Gerando o cofre…');
+var salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12)),it=600000;
+chave(lg,sn,salt,it).then(function(k){
+return crypto.subtle.encrypt({name:'AES-GCM',iv:iv},k,new TextEncoder().encode(JSON.stringify({o:o,r:r,t:t})));
+}).then(function(ct){
+var txt=JSON.stringify({v:1,it:it,salt:b64(salt),iv:b64(iv),data:b64(ct)});
+var out=document.getElementById('gout'),dl=document.getElementById('gdl');
+out.value=txt;out.style.display='block';
+dl.href='data:application/json;base64,'+btoa(txt);dl.style.display='inline-block';
+document.getElementById('ghtoken').value='';document.getElementById('gnsenha').value='';
+cm('Cofre gerado. Baixe o cofre.json e envie para a raiz do repositório.');
+}).catch(function(){cm('Não foi possível gerar o cofre.');});
 });
-document.getElementById('ghlimpar').addEventListener('click',function(){
-gh.token='';
-try{localStorage.setItem('gh-config',JSON.stringify(gh));}catch(e){}
-document.getElementById('ghtoken').placeholder='github_pat_...';
-document.getElementById('ghcfgmsg').textContent='Token removido deste navegador.';
+document.getElementById('gabrir').addEventListener('click',function(){
+var lg=document.getElementById('glogin').value,sn=document.getElementById('gsenha').value;
+if(!lg||!sn){cm('Digite login e senha.');return;}
+if(!(window.crypto&&crypto.subtle)){cm('Este navegador não permite criptografia aqui. Use a página em https.');return;}
+cm('Verificando…');
+fetch('cofre.json?v='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw 'nocofre';return r.json();}).then(function(c){
+var it=parseInt(c.it,10);
+if(!(it>=100000&&it<=2000000))throw 'invalido';
+return chave(lg,sn,unb64(c.salt),it).then(function(k){return crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(c.iv)},k,unb64(c.data));});
+}).then(function(pt){
+var d=JSON.parse(new TextDecoder().decode(pt));
+gh.owner=d.o;gh.repo=d.r;gh.token=d.t;
+document.getElementById('gsenha').value='';
+cm('Desbloqueado. Use "Salvar no GitHub" no seletor de avatar.');
+}).catch(function(e){
+cm(e==='nocofre'?'Cofre não encontrado. Crie o cofre e envie o cofre.json para o repositório.':'Login ou senha incorretos.');
+});
+});
+document.getElementById('gfechar').addEventListener('click',function(){
+gh.token='';document.getElementById('gsenha').value='';cm('Bloqueado.');
 });
 // Avatares compartilhados: imagens na pasta avatares/ do repositório (lucas.png, michelle.png, ...)
 var slugs=['lucas','michelle','claudio','alex','alexandre','alice'],exts=['png','jpg','jpeg','webp'];

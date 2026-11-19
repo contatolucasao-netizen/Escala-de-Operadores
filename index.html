@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Escala de Operadores</title>
+<title>Escala de Máquinas</title>
 <style>
 :root{--bg:#f6f7f9;--card:#fff;--text:#1d2330;--muted:#5d6678;--accent:#2563eb;--off:#fde8c8;--offt:#8a4b00;--cur:#e6efff;--border:#e2e5ea;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -11,14 +11,14 @@ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:en
 :root[data-theme="dark"]{--bg:#12151c;--card:#1b2029;--text:#e8eaf0;--muted:#9aa3b5;--accent:#6b9bff;--off:#4a3412;--offt:#ffd9a0;--cur:#20304f;--border:#2a3040}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Apple Color Emoji","Segoe UI Emoji",sans-serif;line-height:1.45}
 main{max-width:960px;margin:0 auto;padding:22px 14px 48px}
 h1{margin:0 0 4px;font-size:1.6rem}
 h2{font-size:1.05rem;margin:0 0 10px}
 .sub{color:var(--muted);margin:0 0 16px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px}
 .names{display:grid;gap:8px}
-.prow{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:8px}
+.prow{display:grid;grid-template-columns:40px minmax(0,1.5fr) minmax(0,1fr);gap:8px;align-items:center}
 input,select,button{width:100%;padding:9px 10px;font-size:.95rem;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text)}
 .top select{background:var(--card);font-weight:600}
 button{width:auto;cursor:pointer;margin-top:12px}
@@ -34,11 +34,22 @@ td.me{outline:2px solid var(--accent);outline-offset:-2px;font-weight:700}
 .tag{font-size:.7rem;background:var(--accent);color:#fff;border-radius:999px;padding:1px 7px;margin-left:6px;vertical-align:middle}
 .note{color:var(--muted);font-size:.82rem;margin:10px 0 0}
 .rodape{text-align:center;color:var(--muted);font-size:.85rem;margin-top:24px}
+.av{width:28px;height:28px;border-radius:50%;object-fit:cover;display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:#fff;flex:none;line-height:1;overflow:hidden}
+.pn{display:inline-flex;align-items:center;gap:8px;justify-content:center}
+.prow button.avb{width:40px;height:40px;padding:0;margin:0;border:0;border-radius:50%;overflow:hidden;background:none;display:block}
+.picker{margin-top:12px;padding:12px;border:1px solid var(--border);border-radius:10px;background:var(--bg);display:none}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(48px,1fr));gap:8px;margin:8px 0 10px}
+.pk{width:48px;height:48px;padding:0;margin:0;border:2px solid transparent;border-radius:50%;background:none;display:flex;align-items:center;justify-content:center}
+.pk.sel{border-color:var(--accent)}
+.pa{margin:0 8px 6px 0}
+.ghbox{display:grid;gap:6px;margin-top:10px;max-width:420px}
+.ghbox button{margin-top:6px}
+summary{cursor:pointer;font-size:.92rem}
 </style>
 </head>
 <body>
 <main>
-<h1>🏭 Escala de Operadores</h1>
+<h1>🏭 Escala de Máquinas</h1>
 <p class="sub">6 pessoas · 5 máquinas · 1 fora da máquina por semana · Nov/2026 a Dez/2027</p>
 
 <div class="fld top"><label for="mes">Mês</label><select id="mes"></select></div>
@@ -47,12 +58,24 @@ td.me{outline:2px solid var(--accent);outline-offset:-2px;font-weight:700}
 <h2>Equipe: nome e máquina na semana</h2>
 <div class="fld"><label for="semana">Semana</label><select id="semana"></select></div>
 <div class="names" id="names"></div>
-
+<div class="picker" id="picker"></div>
+<input type="file" id="arq" accept="image/*" style="display:none">
+<input type="file" id="arqgh" accept="image/*" style="display:none">
+<details style="margin-top:12px"><summary>⚙️ Conectar ao GitHub (salvar avatares para todos)</summary>
+<div class="ghbox">
+<label for="ghowner">Usuário ou organização</label><input id="ghowner" autocomplete="off">
+<label for="ghrepo">Repositório</label><input id="ghrepo" autocomplete="off">
+<label for="ghtoken">Token de acesso</label><input id="ghtoken" type="password" autocomplete="off" placeholder="github_pat_...">
+<div><button type="button" id="ghsalvar">Salvar</button><button type="button" id="ghlimpar" style="margin-left:8px">Remover token</button></div>
+<p class="note" id="ghcfgmsg"></p>
+<p class="note">Como gerar o token: GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token. Em "Repository access" escolha só este repositório e, em Permissions, deixe Contents como "Read and write". O token fica salvo apenas neste navegador. Não compartilhe: quem o tiver pode alterar os arquivos do repositório.</p>
+</div></details>
 <div style="margin-top:12px;max-width:260px">
 <label for="eu">Quem é você? (destaca na tabela)</label>
 <select id="eu"></select>
 </div>
 <button id="reset" type="button">Restaurar escala original</button>
+<button id="rmav" type="button" style="margin-left:8px">Restaurar avatares</button>
 </div>
 
 <div class="card">
@@ -61,7 +84,6 @@ td.me{outline:2px solid var(--accent);outline-offset:-2px;font-weight:700}
 <thead><tr><th>Semana</th><th>Máq. 1</th><th>Máq. 2</th><th>Máq. 3</th><th>Máq. 4</th><th>Avalanche</th><th>Fora da Máquina</th></tr></thead>
 <tbody id="corpo"></tbody>
 </table></div>
-
 </div>
 <footer class="rodape">Criado por Lucas Oliveira</footer>
 </main>
@@ -69,10 +91,52 @@ td.me{outline:2px solid var(--accent);outline-offset:-2px;font-weight:700}
 var NOMES_MES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 var maqs=['Máq. 1','Máq. 2','Máq. 3','Máq. 4','Avalanche','Fora da máquina'];
 var padrao=['Lucas','Michelle','Claudio','Alex','Alexandre','Alice'];
+var cores=['#2563eb','#db2777','#059669','#d97706','#7c3aed','#0891b2'];
+// Avatares pré-definidos: [emoji, cor de fundo]
+// Avatares de desenho (SVG): cabelo, pele, cores, óculos, barba, boné
+var presets=[
+{bg:'#bfdbfe',skin:'#f1c9a5',hair:'#3b2a20',h:'short',shirt:'#2563eb'},
+{bg:'#fbcfe8',skin:'#e8b88f',hair:'#6b3410',h:'long',shirt:'#db2777'},
+{bg:'#bbf7d0',skin:'#c68642',hair:'#1b1b1b',h:'short',shirt:'#059669',beard:1},
+{bg:'#fde68a',skin:'#f1c9a5',hair:'#7a4a21',h:'cap',shirt:'#d97706',cap:'#ef4444'},
+{bg:'#ddd6fe',skin:'#8d5524',hair:'#1b1b1b',h:'curly',shirt:'#7c3aed',glasses:1},
+{bg:'#a5f3fc',skin:'#ffdbb5',hair:'#b45309',h:'bun',shirt:'#0891b2'},
+{bg:'#fecaca',skin:'#e0ac69',hair:'#4b3621',h:'bald',shirt:'#dc2626',beard:1},
+{bg:'#fef3c7',skin:'#8d5524',hair:'#1b1b1b',h:'long',shirt:'#92400e',glasses:1},
+{bg:'#e2e8f0',skin:'#f1c9a5',hair:'#2563eb',h:'spiky',shirt:'#334155'},
+{bg:'#d9f99d',skin:'#c68642',hair:'#1b1b1b',h:'short',shirt:'#4d7c0f',glasses:1},
+{bg:'#c7d2fe',skin:'#ffdbb5',hair:'#eab308',h:'long',shirt:'#4f46e5'},
+{bg:'#fed7aa',skin:'#f1c9a5',hair:'#c2410c',h:'curly',shirt:'#ea580c'}
+];
+function svgFace(c,t,k){
+var H=c.hair,s='<svg viewBox="0 0 100 100" width="'+t+'" height="'+t+'" style="display:block" aria-hidden="true">';
+s+='<rect width="100" height="100" fill="'+c.bg+'"/>';
+if(c.h==='long')s+='<path d="M26 52Q20 18 50 18Q80 18 74 52L77 88L23 88Z" fill="'+H+'"/>';
+s+='<path d="M14 100Q14 76 50 76Q86 76 86 100Z" fill="'+c.shirt+'"/>';
+s+='<rect x="43" y="62" width="14" height="18" fill="'+c.skin+'"/><rect x="43" y="62" width="14" height="18" fill="#000" opacity=".12"/>';
+s+='<circle cx="29" cy="50" r="4.5" fill="'+c.skin+'"/><circle cx="71" cy="50" r="4.5" fill="'+c.skin+'"/>';
+s+='<ellipse cx="50" cy="48" rx="21" ry="24" fill="'+c.skin+'"/>';
+if(c.h==='short'||c.h==='bun')s+='<path d="M29 47Q27 21 50 21Q73 21 71 47Q67 33 50 32Q33 33 29 47Z" fill="'+H+'"/>';
+if(c.h==='bun')s+='<circle cx="50" cy="14" r="9" fill="'+H+'"/>';
+if(c.h==='long')s+='<path d="M29 45Q31 25 50 25Q69 25 71 45Q62 33 50 33Q38 33 29 45Z" fill="'+H+'"/>';
+if(c.h==='curly'){[[31,36],[40,27],[50,24],[60,27],[69,36],[29,47],[71,47]].forEach(function(q){s+='<circle cx="'+q[0]+'" cy="'+q[1]+'" r="9" fill="'+H+'"/>';});}
+if(c.h==='cap')s+='<path d="M28 42Q29 19 50 19Q71 19 72 42Z" fill="'+c.cap+'"/><rect x="24" y="40" width="52" height="5" rx="2.5" fill="'+c.cap+'"/><rect x="24" y="40" width="52" height="5" rx="2.5" fill="#000" opacity=".15"/>';
+if(c.h==='spiky')s+='<path d="M29 44L28 22L38 30L42 14L50 28L58 14L62 30L72 22L71 44Q66 34 50 33Q34 34 29 44Z" fill="'+H+'"/>';
+s+='<circle cx="36" cy="58" r="4" fill="#f472b6" opacity=".25"/><circle cx="64" cy="58" r="4" fill="#f472b6" opacity=".25"/>';
+if(c.beard)s+='<path d="M30 54Q32 76 50 76Q68 76 70 54Q66 64 50 64Q34 64 30 54Z" fill="'+H+'"/>';
+s+='<path d="M37 43Q42 40 47 43M53 43Q58 40 63 43" stroke="'+H+'" stroke-width="2" fill="none" stroke-linecap="round"/>';
+s+='<circle cx="42" cy="50" r="2.6" fill="#1f2937"/><circle cx="58" cy="50" r="2.6" fill="#1f2937"/>';
+var mc=c.beard?'#f8d7c4':'#7f1d1d';
+if(k%2===0)s+='<path d="M43 60Q50 67 57 60" stroke="'+mc+'" stroke-width="2.2" fill="none" stroke-linecap="round"/>';
+else s+='<path d="M44 59Q50 70 56 59Z" fill="'+mc+'"/>';
+if(c.glasses)s+='<circle cx="42" cy="50" r="7.5" fill="#fff" fill-opacity=".15" stroke="#111827" stroke-width="2"/><circle cx="58" cy="50" r="7.5" fill="#fff" fill-opacity=".15" stroke="#111827" stroke-width="2"/><path d="M49.5 50h1" stroke="#111827" stroke-width="2"/>';
+return s+'</svg>';
+}
+function faceHTML(k,t){return '<span class="av" style="width:'+t+'px;height:'+t+'px">'+svgFace(presets[k],t,k)+'</span>';}
+var avsPadrao=[null,null,null,null,null,null];
 function p2(n){return (n<10?'0':'')+n;}
 function fmt(d){return p2(d.getDate())+'/'+p2(d.getMonth()+1);}
 
-// Semanas (segunda a sábado) de 02/11/2026 até a última segunda de dez/2027
 var semanas=[];
 for(var g=0;g<61;g++){
 var d=new Date(2026,10,2+7*g);
@@ -81,7 +145,6 @@ var dom=new Date(d.getFullYear(),d.getMonth(),d.getDate()+6);
 semanas.push({g:g,ini:d.getTime(),fim:dom.getTime(),mes:d.getFullYear()*12+d.getMonth(),txt:fmt(d)+' a '+fmt(sab)});
 }
 // Rodízio: índices 0 Lucas, 1 Michelle, 2 Claudio, 3 Alex, 4 Alexandre, 5 Alice | [M1,M2,M3,M4,Avalanche,Fora]
-// Quem está fora entra na Máq. 1; todos avançam uma máquina; quem estava na Avalanche fica fora.
 function proxima(e){return [e[5],e[0],e[1],e[2],e[3],e[4]];}
 var base=[[3,1,0,5,2,4]];
 for(var k=1;k<61;k++)base.push(proxima(base[k-1]));
@@ -93,14 +156,34 @@ function semanasDoMes(m){return semanas.filter(function(s){return s.mes===m;});}
 
 var nomes=padrao.slice();
 var ajustes={};
+var fotos={};
+var avs=avsPadrao.slice();
+var repo={};
+var gh={owner:'',repo:'',token:''};
+try{var g0=localStorage.getItem('gh-config');if(g0){var g1=JSON.parse(g0);if(g1&&typeof g1==='object'){gh.owner=g1.owner||'';gh.repo=g1.repo||'';gh.token=g1.token||'';}}}catch(e){}
+try{if(!gh.owner&&/\.github\.io$/.test(location.hostname)){gh.owner=location.hostname.split('.')[0];var seg=location.pathname.split('/')[1];gh.repo=(seg&&seg.indexOf('.')<0)?seg:(gh.owner+'.github.io');}}catch(e){}
 var eu=0;
+var pickerSel=-1;
 try{var s1=localStorage.getItem('nomes-escala');if(s1){var a=JSON.parse(s1);if(a&&a.length===6)nomes=a;}}catch(e){}
 try{var s2=localStorage.getItem('ajustes-v3');if(s2){var b=JSON.parse(s2);if(b&&typeof b==='object')ajustes=b;}}catch(e){}
 try{var s3=localStorage.getItem('eu-escala');if(s3!==null)eu=parseInt(s3,10)||0;}catch(x){}
+try{var s4=localStorage.getItem('fotos-v1');if(s4){var f4=JSON.parse(s4);if(f4&&typeof f4==='object')fotos=f4;}}catch(e){}
+try{var s5=localStorage.getItem('avatares-v3');if(s5){var a5=JSON.parse(s5);if(a5&&a5.length===6)avs=a5;}}catch(e){}
 
 function getEscala(g){return ajustes[g]||base[g];}
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]});}
-function salvar(){try{localStorage.setItem('nomes-escala',JSON.stringify(nomes));localStorage.setItem('ajustes-v3',JSON.stringify(ajustes));localStorage.setItem('eu-escala',String(eu));}catch(e){}}
+function salvar(){try{localStorage.setItem('nomes-escala',JSON.stringify(nomes));localStorage.setItem('ajustes-v3',JSON.stringify(ajustes));localStorage.setItem('eu-escala',String(eu));localStorage.setItem('fotos-v1',JSON.stringify(fotos));localStorage.setItem('avatares-v3',JSON.stringify(avs));}catch(e){}}
+
+function iniciais(i){var p=String(nomes[i]).trim().split(/\s+/);return ((p[0]||'?').charAt(0)+(p[1]?p[1].charAt(0):'')).toUpperCase();}
+function avatar(i,t){
+var st='width:'+t+'px;height:'+t+'px;',m=avs[i];
+function img(u){return '<img class="av" alt="" style="'+st+'" src="'+esc(u)+'">';}
+if(m==='foto'&&fotos[i])return img(fotos[i]);
+if(m==='ini')return '<span class="av" style="'+st+'background:'+cores[i]+';font-size:'+Math.round(t*0.38)+'px">'+esc(iniciais(i))+'</span>';
+if(typeof m==='number'&&presets[m])return faceHTML(m,t);
+if(repo[i])return img(repo[i]);
+return faceHTML(i%presets.length,t);
+}
 
 function atual(){
 var h=new Date(),t=new Date(h.getFullYear(),h.getMonth(),h.getDate()).getTime();
@@ -125,8 +208,10 @@ function desenhaNomes(){
 var box=document.getElementById('names');box.innerHTML='';
 nomes.forEach(function(n,i){
 var row=document.createElement('div');row.className='prow';
+var ab=document.createElement('button');ab.type='button';ab.className='avb';ab.title='Escolher avatar';ab.setAttribute('aria-label','Avatar de '+n);ab.innerHTML=avatar(i,40);
+ab.addEventListener('click',function(){pickerSel=(pickerSel===i?-1:i);desenhaPicker();});
 var inp=document.createElement('input');inp.value=n;inp.setAttribute('aria-label','Nome '+(i+1));
-inp.addEventListener('input',function(){nomes[i]=inp.value||padrao[i];salvar();desenhaTabela();desenhaSelect();});
+inp.addEventListener('input',function(){nomes[i]=inp.value||padrao[i];salvar();desenhaTabela();desenhaSelect();ab.innerHTML=avatar(i,40);});
 var sm=document.createElement('select');sm.setAttribute('aria-label','Máquina de '+n);
 sm.innerHTML=opcoes(maqs,getEscala(semSel).indexOf(i));
 sm.addEventListener('change',function(){
@@ -135,9 +220,28 @@ linha[novo]=i;linha[velho]=outro;
 ajustes[semSel]=linha;
 salvar();desenhaNomes();desenhaTabela();
 });
-row.appendChild(inp);row.appendChild(sm);
+row.appendChild(ab);row.appendChild(inp);row.appendChild(sm);
 box.appendChild(row);
 });
+}
+function desenhaPicker(){
+var pk=document.getElementById('picker');
+if(pickerSel<0){pk.style.display='none';pk.innerHTML='';return;}
+var i=pickerSel;
+var h='<label>Avatar de '+esc(nomes[i])+'</label><div class="pgrid">';
+presets.forEach(function(p,k){
+h+='<button type="button" class="pk'+(avs[i]===k?' sel':'')+'" data-k="'+k+'" aria-label="Avatar '+(k+1)+'">'+faceHTML(k,40)+'</button>';
+});
+h+='</div><button type="button" class="pa" id="pauto">Padrão</button><button type="button" class="pa" id="pini">Usar iniciais</button><button type="button" class="pa" id="pfoto">Foto só neste aparelho</button><button type="button" class="pa" id="pgh">Salvar no GitHub (todos veem)</button><button type="button" class="pa" id="pfim">Fechar</button><div class="note" id="ghmsg"></div>';
+pk.innerHTML=h;pk.style.display='block';
+pk.querySelectorAll('.pk').forEach(function(b){
+b.addEventListener('click',function(){avs[i]=parseInt(b.getAttribute('data-k'),10);salvar();desenhaNomes();desenhaTabela();desenhaPicker();});
+});
+document.getElementById('pauto').addEventListener('click',function(){avs[i]=null;salvar();desenhaNomes();desenhaTabela();desenhaPicker();});
+document.getElementById('pini').addEventListener('click',function(){avs[i]='ini';salvar();desenhaNomes();desenhaTabela();desenhaPicker();});
+document.getElementById('pgh').addEventListener('click',function(){if(!gh.owner||!gh.repo||!gh.token){ghm('Configure o GitHub primeiro: abra "Conectar ao GitHub", logo abaixo.');return;}document.getElementById('arqgh').click();});
+document.getElementById('pfoto').addEventListener('click',function(){document.getElementById('arq').click();});
+document.getElementById('pfim').addEventListener('click',function(){pickerSel=-1;desenhaPicker();});
 }
 function desenhaSelect(){
 var sel=document.getElementById('eu');sel.innerHTML='';
@@ -149,8 +253,8 @@ document.getElementById('titulo').textContent='Escala semanal – '+nomeMes(mesS
 semanasDoMes(mesSel).forEach(function(sm,idx){
 var e=getEscala(sm.g),folga=e[5],op=e.slice(0,5),agora=(sm.g===cur);
 html+='<tr'+(agora?' class="cur"':'')+'><td><b>Sem. '+(idx+1)+'</b><br><span style="color:var(--muted);font-size:.8rem">'+esc(sm.txt)+'</span>'+(agora?'<span class="tag">agora</span>':'')+'</td>';
-op.forEach(function(p){html+='<td'+(p===eu?' class="me"':'')+'>'+esc(nomes[p])+'</td>';});
-html+='<td class="off'+(folga===eu?' me':'')+'">'+esc(nomes[folga])+'</td></tr>';
+op.forEach(function(p){html+='<td'+(p===eu?' class="me"':'')+'><span class="pn">'+avatar(p,26)+esc(nomes[p])+'</span></td>';});
+html+='<td class="off'+(folga===eu?' me':'')+'"><span class="pn">'+avatar(folga,26)+esc(nomes[folga])+'</span></td></tr>';
 });
 document.getElementById('corpo').innerHTML=html;
 }
@@ -163,7 +267,94 @@ desenhaSemana();desenhaNomes();desenhaTabela();
 document.getElementById('semana').addEventListener('change',function(ev){semSel=parseInt(ev.target.value,10);desenhaNomes();});
 document.getElementById('eu').addEventListener('change',function(ev){eu=parseInt(ev.target.value,10);salvar();desenhaTabela();});
 document.getElementById('reset').addEventListener('click',function(){ajustes={};salvar();desenhaNomes();desenhaTabela();});
+document.getElementById('rmav').addEventListener('click',function(){avs=avsPadrao.slice();fotos={};salvar();desenhaNomes();desenhaTabela();desenhaPicker();});
+document.getElementById('arq').addEventListener('change',function(ev){
+var inpf=ev.target,f=inpf.files&&inpf.files[0];
+if(!f||pickerSel<0)return;
+var i=pickerSel,rd=new FileReader();
+rd.onload=function(){var im=new Image();im.onload=function(){
+var c=document.createElement('canvas');c.width=c.height=96;var x=c.getContext('2d');
+var l=Math.min(im.width,im.height),sx=(im.width-l)/2,sy=(im.height-l)/2;
+x.drawImage(im,sx,sy,l,l,0,0,96,96);
+fotos[i]=c.toDataURL('image/jpeg',0.8);avs[i]='foto';
+salvar();desenhaNomes();desenhaTabela();desenhaPicker();inpf.value='';
+};im.src=rd.result;};
+rd.readAsDataURL(f);
+});
 desenhaMes();desenhaSemana();desenhaNomes();desenhaSelect();desenhaTabela();
+function ghm(t){var e=document.getElementById('ghmsg');if(e)e.textContent=t;}
+function ghEnviar(i,file){
+ghm('Enviando…');
+var rd=new FileReader();
+rd.onload=function(){
+document.getElementById('arqgh').value='';
+var im=new Image();
+im.onload=function(){
+var c=document.createElement('canvas');c.width=c.height=256;var x=c.getContext('2d');
+var l=Math.min(im.width,im.height),sx=(im.width-l)/2,sy=(im.height-l)/2;
+x.drawImage(im,sx,sy,l,l,0,0,256,256);
+var data=c.toDataURL('image/png'),b64=data.split(',')[1];
+var url='https://api.github.com/repos/'+encodeURIComponent(gh.owner)+'/'+encodeURIComponent(gh.repo)+'/contents/avatares/'+slugs[i]+'.png';
+var hd={'Accept':'application/vnd.github+json','Authorization':'Bearer '+gh.token,'Content-Type':'application/json'};
+fetch(url,{headers:hd,cache:'no-store'}).then(function(r){
+if(r.status===200)return r.json();
+if(r.status===404)return {};
+return Promise.reject(r.status);
+}).then(function(j){
+var body={message:'Atualiza avatar de '+slugs[i],content:b64};
+if(j&&j.sha)body.sha=j.sha;
+return fetch(url,{method:'PUT',headers:hd,body:JSON.stringify(body)});
+}).then(function(r){
+if(!r.ok)return Promise.reject(r.status);
+repo[i]=data;avs[i]=null;salvar();desenhaNomes();desenhaTabela();desenhaPicker();
+ghm('Salvo! Todos veem a nova imagem em 1 a 2 minutos.');
+}).catch(function(e){
+var t='Não foi possível enviar.';
+if(e===401||e===403)t='Token inválido ou sem permissão de escrita (Contents: Read and write).';
+else if(e===404)t='Repositório não encontrado. Confira o usuário e o nome do repositório.';
+else if(e===409||e===422)t='O GitHub recusou o envio. Tente de novo em instantes.';
+else if(typeof e!=='number')t='Sem conexão com o GitHub. O envio só funciona na página hospedada no GitHub Pages.';
+ghm(t);
+});
+};
+im.src=rd.result;
+};
+rd.readAsDataURL(file);
+}
+document.getElementById('arqgh').addEventListener('change',function(ev){
+var f=ev.target.files&&ev.target.files[0];
+if(!f||pickerSel<0)return;
+ghEnviar(pickerSel,f);
+});
+document.getElementById('ghowner').value=gh.owner;
+document.getElementById('ghrepo').value=gh.repo;
+document.getElementById('ghtoken').placeholder=gh.token?'Token salvo (deixe em branco para manter)':'github_pat_...';
+document.getElementById('ghsalvar').addEventListener('click',function(){
+gh.owner=document.getElementById('ghowner').value.trim();
+gh.repo=document.getElementById('ghrepo').value.trim();
+var t=document.getElementById('ghtoken').value.trim();
+if(t)gh.token=t;
+document.getElementById('ghtoken').value='';
+try{localStorage.setItem('gh-config',JSON.stringify(gh));}catch(e){}
+document.getElementById('ghtoken').placeholder=gh.token?'Token salvo (deixe em branco para manter)':'github_pat_...';
+document.getElementById('ghcfgmsg').textContent=(gh.owner&&gh.repo&&gh.token)?'Conectado. Agora use "Salvar no GitHub" no seletor de avatar.':'Preencha usuário, repositório e token.';
+});
+document.getElementById('ghlimpar').addEventListener('click',function(){
+gh.token='';
+try{localStorage.setItem('gh-config',JSON.stringify(gh));}catch(e){}
+document.getElementById('ghtoken').placeholder='github_pat_...';
+document.getElementById('ghcfgmsg').textContent='Token removido deste navegador.';
+});
+// Avatares compartilhados: imagens na pasta avatares/ do repositório (lucas.png, michelle.png, ...)
+var slugs=['lucas','michelle','claudio','alex','alexandre','alice'],exts=['png','jpg','jpeg','webp'];
+function detecta(i,e){
+if(e>=exts.length)return;
+var im=new Image(),u='avatares/'+slugs[i]+'.'+exts[e];
+im.onload=function(){repo[i]=u;desenhaNomes();desenhaTabela();};
+im.onerror=function(){detecta(i,e+1);};
+im.src=u;
+}
+for(var q=0;q<6;q++)detecta(q,0);
 </script>
 </body>
 </html>

@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Escala de Máquinas</title>
+<meta name="theme-color" content="#2563eb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Escala">
+<title>Escala de Operadores</title>
 <style>
 :root{--bg:#f6f7f9;--card:#fff;--text:#1d2330;--muted:#5d6678;--accent:#2563eb;--off:#fde8c8;--offt:#8a4b00;--cur:#e6efff;--border:#e2e5ea;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -18,7 +19,7 @@ h2{font-size:1.05rem;margin:0 0 10px}
 .sub{color:var(--muted);margin:0 0 16px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px}
 .names{display:grid;gap:8px}
-.prow{display:grid;grid-template-columns:40px minmax(0,1.5fr) minmax(0,1fr);gap:8px;align-items:center}
+.prow{display:grid;grid-template-columns:40px minmax(max-content,1.5fr) minmax(0,1fr);gap:8px;align-items:center}
 input,select,button{width:100%;padding:9px 10px;font-size:.95rem;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text)}
 .top select{background:var(--card);font-weight:600}
 button{width:auto;cursor:pointer;margin-top:12px}
@@ -35,7 +36,12 @@ td.me{outline:2px solid var(--accent);outline-offset:-2px;font-weight:700}
 .note{color:var(--muted);font-size:.82rem;margin:10px 0 0}
 .rodape{text-align:center;color:var(--muted);font-size:.85rem;margin-top:24px}
 .av{width:28px;height:28px;border-radius:50%;object-fit:cover;display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:#fff;flex:none;line-height:1;overflow:hidden}
-.pn{display:inline-flex;align-items:center;gap:8px;justify-content:center}
+.pn{display:inline-flex;align-items:center;gap:8px;justify-content:center;white-space:nowrap}
+.nome{display:flex;gap:2px;align-items:center;min-width:0;flex-wrap:nowrap}
+.nome input{flex:0 0 auto;min-width:0}
+.nome input[readonly]{background:transparent;border-color:transparent;cursor:default;font-weight:600;text-overflow:clip;padding-left:4px;padding-right:4px}
+.prow button.edb{width:28px;height:28px;padding:0;margin:0;flex:none;display:flex;align-items:center;justify-content:center;border:0;border-radius:6px;background:transparent;color:var(--muted)}
+.prow button.edb:hover,.prow button.edb.on{color:var(--accent);background:var(--cur)}
 .prow button.avb{width:40px;height:40px;padding:0;margin:0;border:0;border-radius:50%;overflow:hidden;background:none;display:block}
 .picker{margin-top:12px;padding:12px;border:1px solid var(--border);border-radius:10px;background:var(--bg);display:none}
 .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(48px,1fr));gap:8px;margin:8px 0 10px}
@@ -47,6 +53,12 @@ td.me{outline:2px solid var(--accent);outline-offset:-2px;font-weight:700}
 .ghbox textarea{width:100%;min-height:90px;font-size:.72rem;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);padding:8px}
 .ghbox a{color:var(--accent)}
 summary{cursor:pointer;font-size:.92rem}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}.bar button{margin:0}
+.fer{display:block;font-size:.72rem;color:var(--offt)}
+.hj{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:8px}.hj span{display:inline-flex;align-items:center;gap:6px}
+.sw{display:flex;flex-wrap:wrap;gap:8px;align-items:end;margin-top:10px}.sw select,.sw input{width:150px}.sw button{margin:0}
+table.rs{min-width:0}.rs td,.rs th{padding:6px;font-size:.82rem}
+@media print{.noprint{display:none!important}body{background:#fff;color:#000}.card{border:0}}
 </style>
 </head>
 <body>
@@ -54,30 +66,36 @@ summary{cursor:pointer;font-size:.92rem}
 <h1>🏭 Escala de Operadores</h1>
 <p class="sub">6 pessoas · 5 máquinas · 1 fora da máquina por semana · Nov/2026 a Dez/2027</p>
 
-<div class="fld top"><label for="mes">Mês</label><select id="mes"></select></div>
+<div class="card noprint" id="hoje"></div>
 
-<div class="card">
-<h2>Equipe: nome e máquina na semana</h2>
+<div class="fld top noprint"><label for="mes">Mês</label><select id="mes"></select></div>
+
+<div class="card noprint">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px"><h2 style="margin:0">Equipe: nome e máquina na semana</h2><button id="bturno" type="button" style="margin:0;font-weight:700;background:var(--cur);color:var(--accent);border-color:var(--accent)">Turno 2</button></div>
 <div class="fld"><label for="semana">Semana</label><select id="semana"></select></div>
 <div class="names" id="names"></div>
 <div class="picker" id="picker"></div>
 <input type="file" id="arq" accept="image/*" style="display:none">
 <input type="file" id="arqgh" accept="image/*" style="display:none">
+<details style="margin-top:12px"><summary>Trocar duas pessoas na semana</summary>
+<div class="sw"><div><label for="swa">Pessoa A</label><select id="swa"></select></div><div><label for="swb">Pessoa B</label><select id="swb"></select></div><button type="button" id="swgo">Trocar</button></div></details>
+<details style="margin-top:8px"><summary>Nomes das máquinas</summary><div class="sw" id="mqs"></div></details>
 
 <div style="margin-top:12px;max-width:260px">
 <label for="eu">Quem é você? (destaca na tabela)</label>
 <select id="eu"></select>
 </div>
-<button id="reset" type="button">Restaurar escala original</button>
-<button id="rmav" type="button" style="margin-left:8px">Restaurar avatares</button>
+<p class="note" id="sync"></p>
 </div>
 
 <div class="card">
 <h2 id="titulo">Escala semanal</h2>
+<div class="bar noprint"><button id="bzap" type="button">Enviar semana no WhatsApp</button><button id="bprint" type="button">Imprimir / PDF</button></div>
 <div class="scroll"><table>
-<thead><tr><th>Semana</th><th>Máq. 1</th><th>Máq. 2</th><th>Máq. 3</th><th>Máq. 4</th><th>Avalanche</th><th>Fora da Máquina</th></tr></thead>
+<thead id="cab"></thead>
 <tbody id="corpo"></tbody>
 </table></div>
+<div id="feriados" style="margin-top:14px"></div>
 </div>
 <footer class="rodape">Criado por Lucas Oliveira</footer>
 </main>
@@ -86,8 +104,6 @@ var NOMES_MES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Ag
 var maqs=['Máq. 1','Máq. 2','Máq. 3','Máq. 4','Avalanche','Fora da máquina'];
 var padrao=['Lucas','Michelle','Claudio','Alex','Alexandre','Alice'];
 var cores=['#2563eb','#db2777','#059669','#d97706','#7c3aed','#0891b2'];
-// Avatares pré-definidos: [emoji, cor de fundo]
-// Avatares de desenho (SVG): cabelo, pele, cores, óculos, barba, boné
 var presets=[
 {bg:'#bfdbfe',skin:'#f1c9a5',hair:'#3b2a20',h:'short',shirt:'#2563eb'},
 {bg:'#fbcfe8',skin:'#e8b88f',hair:'#6b3410',h:'long',shirt:'#db2777'},
@@ -138,7 +154,6 @@ var sab=new Date(d.getFullYear(),d.getMonth(),d.getDate()+5);
 var dom=new Date(d.getFullYear(),d.getMonth(),d.getDate()+6);
 semanas.push({g:g,ini:d.getTime(),fim:dom.getTime(),mes:d.getFullYear()*12+d.getMonth(),txt:fmt(d)+' a '+fmt(sab)});
 }
-// Rodízio: índices 0 Lucas, 1 Michelle, 2 Claudio, 3 Alex, 4 Alexandre, 5 Alice | [M1,M2,M3,M4,Avalanche,Fora]
 function proxima(e){return [e[5],e[0],e[1],e[2],e[3],e[4]];}
 var base=[[3,1,0,5,2,4]];
 for(var k=1;k<61;k++)base.push(proxima(base[k-1]));
@@ -153,6 +168,9 @@ var ajustes={};
 var fotos={};
 var avs=avsPadrao.slice();
 var repo={};
+var mq=['Máq. 1','Máq. 2','Máq. 3','Máq. 4'];
+var obs={};
+var snap=JSON.stringify({nomes:padrao.slice(),ajustes:{},obs:{},maq:mq.slice()});
 var PROXY_URL='https://avatares.contatolucas-ao.workers.dev';
 try{localStorage.removeItem('gh-config');}catch(e){}
 var eu=0;
@@ -162,10 +180,35 @@ try{var s2=localStorage.getItem('ajustes-v3');if(s2){var b=JSON.parse(s2);if(b&&
 try{var s3=localStorage.getItem('eu-escala');if(s3!==null)eu=parseInt(s3,10)||0;}catch(x){}
 try{var s4=localStorage.getItem('fotos-v1');if(s4){var f4=JSON.parse(s4);if(f4&&typeof f4==='object')fotos=f4;}}catch(e){}
 try{var s5=localStorage.getItem('avatares-v3');if(s5){var a5=JSON.parse(s5);if(a5&&a5.length===6)avs=a5;}}catch(e){}
+try{var s6=localStorage.getItem('obs-v1');if(s6){var o6=JSON.parse(s6);if(o6&&typeof o6==='object')obs=o6;}}catch(e){}
+try{var s7=localStorage.getItem('maq-v1');if(s7){var m7=JSON.parse(s7);if(m7&&m7.length===4)mq=m7;}}catch(e){}
+try{var s8=localStorage.getItem('snap-v1');if(s8)snap=s8;}catch(e){}
+function aplicaMq(){for(var i=0;i<4;i++)maqs[i]=mq[i];}
+aplicaMq();
+var turno=2,ST={},padrao1=['Joyce','Deangeles','Daniele','Wesley','Matheus','Marciane'];
+var SLUGS={2:['lucas','michelle','claudio','alex','alexandre','alice'],1:['joyce','deangeles','daniele','wesley','matheus','marciane']},slugs=SLUGS[2];
+function guarda(){ST[turno]={nomes:nomes,ajustes:ajustes,avs:avs,fotos:fotos,repo:repo,eu:eu};}
+function carrega(t){var s=ST[t];nomes=s.nomes;ajustes=s.ajustes;avs=s.avs;fotos=s.fotos;repo=s.repo;eu=s.eu;slugs=SLUGS[t];turno=t;}
+(function(){
+guarda();
+var s1={nomes:padrao1.slice(),ajustes:{},avs:avsPadrao.slice(),fotos:{},repo:{},eu:0};
+try{var a=JSON.parse(localStorage.getItem('ajustes-t1')||'null');if(a&&typeof a==='object')s1.ajustes=a;}catch(e){}
+try{var b=JSON.parse(localStorage.getItem('avatares-t1')||'null');if(b&&b.length===6)s1.avs=b;}catch(e){}
+try{var c=JSON.parse(localStorage.getItem('fotos-t1')||'null');if(c&&typeof c==='object')s1.fotos=c;}catch(e){}
+try{s1.eu=parseInt(localStorage.getItem('eu-t1'),10)||0;}catch(e){}
+ST[1]=s1;
+var t0=null;try{t0=localStorage.getItem('turno-escala');}catch(e){}
+if(t0==='1')carrega(1);
+})();
+function estado(){guarda();return {nomes:ST[2].nomes,ajustes:ST[2].ajustes,obs:obs,maq:mq,t1:{ajustes:ST[1].ajustes}};}
+function sujo(){return JSON.stringify(estado())!==snap;}
+function sync(t){var e=document.getElementById('sync');if(e)e.textContent=t;}
+function atualizaSync(){}
+function salvaExtra(){try{localStorage.setItem('obs-v1',JSON.stringify(obs));localStorage.setItem('maq-v1',JSON.stringify(mq));localStorage.setItem('snap-v1',snap);}catch(e){}atualizaSync();}
 
 function getEscala(g){return ajustes[g]||base[g];}
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]});}
-function salvar(){try{localStorage.setItem('nomes-escala',JSON.stringify(nomes));localStorage.setItem('ajustes-v3',JSON.stringify(ajustes));localStorage.setItem('eu-escala',String(eu));localStorage.setItem('fotos-v1',JSON.stringify(fotos));localStorage.setItem('avatares-v3',JSON.stringify(avs));}catch(e){}}
+function salvar(){guarda();salvaExtra();try{localStorage.setItem('nomes-escala',JSON.stringify(ST[2].nomes));localStorage.setItem('ajustes-v3',JSON.stringify(ST[2].ajustes));localStorage.setItem('eu-escala',String(ST[2].eu));localStorage.setItem('fotos-v1',JSON.stringify(ST[2].fotos));localStorage.setItem('avatares-v3',JSON.stringify(ST[2].avs));localStorage.setItem('ajustes-t1',JSON.stringify(ST[1].ajustes));localStorage.setItem('eu-t1',String(ST[1].eu));localStorage.setItem('fotos-t1',JSON.stringify(ST[1].fotos));localStorage.setItem('avatares-t1',JSON.stringify(ST[1].avs));localStorage.setItem('turno-escala',String(turno));}catch(e){}publica();}
 
 function iniciais(i){var p=String(nomes[i]).trim().split(/\s+/);return ((p[0]||'?').charAt(0)+(p[1]?p[1].charAt(0):'')).toUpperCase();}
 function avatar(i,t){
@@ -197,14 +240,17 @@ function desenhaSemana(){
 var lista=semanasDoMes(mesSel),ss=document.getElementById('semana');
 ss.innerHTML=lista.map(function(s,i){return '<option value="'+s.g+'"'+(s.g===semSel?' selected':'')+'>Semana '+(i+1)+' ('+esc(s.txt)+')</option>';}).join('');
 }
+var IC_ED='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+var IC_OK='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+function larg(el,min){el.style.width='calc('+(Math.max(el.value.length,min)+2)+'ch + 16px)';}
 function desenhaNomes(){
 var box=document.getElementById('names');box.innerHTML='';
 nomes.forEach(function(n,i){
 var row=document.createElement('div');row.className='prow';
 var ab=document.createElement('button');ab.type='button';ab.className='avb';ab.title='Escolher avatar';ab.setAttribute('aria-label','Avatar de '+n);ab.innerHTML=avatar(i,40);
 ab.addEventListener('click',function(){pickerSel=(pickerSel===i?-1:i);desenhaPicker();});
-var inp=document.createElement('input');inp.value=n;inp.setAttribute('aria-label','Nome '+(i+1));
-inp.addEventListener('input',function(){nomes[i]=inp.value||padrao[i];salvar();desenhaTabela();desenhaSelect();ab.innerHTML=avatar(i,40);});
+var nw=document.createElement('div');nw.className='nome';var nm=document.createElement('span');nm.style.fontWeight='600';nm.style.padding='0 4px';nm.textContent=n;
+nw.appendChild(nm);
 var sm=document.createElement('select');sm.setAttribute('aria-label','Máquina de '+n);
 sm.innerHTML=opcoes(maqs,getEscala(semSel).indexOf(i));
 sm.addEventListener('change',function(){
@@ -213,7 +259,7 @@ linha[novo]=i;linha[velho]=outro;
 ajustes[semSel]=linha;
 salvar();desenhaNomes();desenhaTabela();
 });
-row.appendChild(ab);row.appendChild(inp);row.appendChild(sm);
+row.appendChild(ab);row.appendChild(nw);row.appendChild(sm);
 box.appendChild(row);
 });
 }
@@ -225,7 +271,7 @@ var h='<label>Avatar de '+esc(nomes[i])+'</label><div class="pgrid">';
 presets.forEach(function(p,k){
 h+='<button type="button" class="pk'+(avs[i]===k?' sel':'')+'" data-k="'+k+'" aria-label="Avatar '+(k+1)+'">'+faceHTML(k,40)+'</button>';
 });
-h+='</div><button type="button" class="pa" id="pauto">Padrão</button><button type="button" class="pa" id="pini">Usar iniciais</button><button type="button" class="pa" id="pfoto">Foto só neste aparelho</button><button type="button" class="pa" id="pgh">Salvar no GitHub (todos veem)</button><button type="button" class="pa" id="pfim">Fechar</button><div class="note" id="ghmsg"></div>';
+h+='</div><button type="button" class="pa" id="pauto">Padrão</button><button type="button" class="pa" id="pini">Usar iniciais</button><button type="button" class="pa" id="pgh">Enviar Imagem</button><button type="button" class="pa" id="pfim">Fechar</button><div class="note" id="ghmsg"></div>';
 pk.innerHTML=h;pk.style.display='block';
 pk.querySelectorAll('.pk').forEach(function(b){
 b.addEventListener('click',function(){avs[i]=parseInt(b.getAttribute('data-k'),10);salvar();desenhaNomes();desenhaTabela();desenhaPicker();});
@@ -233,16 +279,16 @@ b.addEventListener('click',function(){avs[i]=parseInt(b.getAttribute('data-k'),1
 document.getElementById('pauto').addEventListener('click',function(){avs[i]=null;salvar();desenhaNomes();desenhaTabela();desenhaPicker();});
 document.getElementById('pini').addEventListener('click',function(){avs[i]='ini';salvar();desenhaNomes();desenhaTabela();desenhaPicker();});
 document.getElementById('pgh').addEventListener('click',function(){if(!PROXY_URL){ghm('O envio para o GitHub ainda não foi configurado.');return;}document.getElementById('arqgh').click();});
-document.getElementById('pfoto').addEventListener('click',function(){document.getElementById('arq').click();});
 document.getElementById('pfim').addEventListener('click',function(){pickerSel=-1;desenhaPicker();});
 }
 function desenhaSelect(){
 var sel=document.getElementById('eu');sel.innerHTML='';
 nomes.forEach(function(n,i){var o=document.createElement('option');o.value=i;o.textContent=n;if(i===eu)o.selected=true;sel.appendChild(o);});
+desenhaSwap();
 }
 function desenhaTabela(){
 var html='';
-document.getElementById('titulo').textContent='Escala semanal – '+nomeMes(mesSel);
+document.getElementById('titulo').textContent='Escala semanal – '+nomeMes(mesSel)+' · Turno '+turno;
 semanasDoMes(mesSel).forEach(function(sm,idx){
 var e=getEscala(sm.g),folga=e[5],op=e.slice(0,5),agora=(sm.g===cur);
 html+='<tr'+(agora?' class="cur"':'')+'><td><b>Sem. '+(idx+1)+'</b><br><span style="color:var(--muted);font-size:.8rem">'+esc(sm.txt)+'</span>'+(agora?'<span class="tag">agora</span>':'')+'</td>';
@@ -250,6 +296,7 @@ op.forEach(function(p){html+='<td'+(p===eu?' class="me"':'')+'><span class="pn">
 html+='<td class="off'+(folga===eu?' me':'')+'"><span class="pn">'+avatar(folga,26)+esc(nomes[folga])+'</span></td></tr>';
 });
 document.getElementById('corpo').innerHTML=html;
+hoje();desenhaFeriados();
 }
 document.getElementById('mes').addEventListener('change',function(ev){
 mesSel=parseInt(ev.target.value,10);
@@ -259,8 +306,6 @@ desenhaSemana();desenhaNomes();desenhaTabela();
 });
 document.getElementById('semana').addEventListener('change',function(ev){semSel=parseInt(ev.target.value,10);desenhaNomes();});
 document.getElementById('eu').addEventListener('change',function(ev){eu=parseInt(ev.target.value,10);salvar();desenhaTabela();});
-document.getElementById('reset').addEventListener('click',function(){ajustes={};salvar();desenhaNomes();desenhaTabela();});
-document.getElementById('rmav').addEventListener('click',function(){avs=avsPadrao.slice();fotos={};salvar();desenhaNomes();desenhaTabela();desenhaPicker();});
 document.getElementById('arq').addEventListener('change',function(ev){
 var inpf=ev.target,f=inpf.files&&inpf.files[0];
 if(!f||pickerSel<0)return;
@@ -274,7 +319,108 @@ salvar();desenhaNomes();desenhaTabela();desenhaPicker();inpf.value='';
 };im.src=rd.result;};
 rd.readAsDataURL(f);
 });
+var FER=[[2026,11,2,'Finados'],[2026,11,20,'Consciência Negra'],[2026,12,25,'Natal'],[2027,1,1,'Confraternização'],[2027,2,8,'Carnaval (8 e 9)'],[2027,3,26,'Sexta-feira Santa'],[2027,4,21,'Tiradentes'],[2027,4,23,'São Jorge (RJ)'],[2027,5,1,'Dia do Trabalho'],[2027,5,27,'Corpus Christi'],[2027,9,7,'Independência'],[2027,10,12,'N. Sra. Aparecida'],[2027,11,2,'Finados'],[2027,11,15,'Proclamação da República'],[2027,11,20,'Consciência Negra'],[2027,12,25,'Natal']];
+function fer(sm){var r=[];FER.forEach(function(f){var t=new Date(f[0],f[1]-1,f[2]).getTime();if(t>=sm.ini&&t<=sm.ini+5*864e5+1e7)r.push(p2(f[2])+'/'+p2(f[1])+' '+f[3]);});return r.length?'<span class="fer">🎌 '+esc(r.join(', '))+'</span>':'';}
+function desenhaFeriados(){
+var el=document.getElementById('feriados');
+var dn=['dom','seg','ter','qua','qui','sex','sáb'];
+var l=FER.filter(function(f){return f[0]*12+f[1]-1===mesSel;});
+el.innerHTML='<h2>Feriados e datas comemorativas – '+esc(nomeMes(mesSel))+'</h2>'+(l.length?l.map(function(f){var d=new Date(f[0],f[1]-1,f[2]);return '<div class="fer" style="font-size:.88rem;margin:4px 0">🎌 '+p2(f[2])+'/'+p2(f[1])+' ('+dn[d.getDay()]+') · '+esc(f[3])+'</div>';}).join(''):'<p class="note">Nenhum feriado neste mês.</p>');
+}
+function cabecalho(){document.getElementById('cab').innerHTML='<tr><th>Semana</th>'+mq.map(function(m){return '<th>'+esc(m)+'</th>';}).join('')+'<th>Avalanche</th><th>Fora da Máquina</th></tr>';}
+function hoje(){
+var el=document.getElementById('hoje');
+if(cur<0){el.style.display='none';return;}
+el.style.display='';
+var e=getEscala(cur),d=new Date(),dias=['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+var h='<h2>Hoje · '+dias[d.getDay()]+', '+fmt(d)+' <span class="tag">Turno '+turno+'</span></h2>';
+if(d.getDay()===0)h+='<p class="note">Domingo: sem expediente. Semana atual: '+semanas[cur].txt+'.</p>';
+h+='<div class="hj">'+e.slice(0,5).map(function(p,k){return '<span>'+avatar(p,26)+'<b>'+esc(maqs[k])+'</b> '+esc(nomes[p])+'</span>';}).join('')+'<span>'+avatar(e[5],26)+'<b>Fora</b> '+esc(nomes[e[5]])+'</span></div>';
+var nx=-1;for(var g=cur;g<semanas.length;g++){if(getEscala(g)[5]===eu){nx=g;break;}}
+h+='<p class="note">'+esc(nomes[eu])+': '+(nx<0?'sem semana fora da máquina no período.':(nx===cur?'esta semana está fora da máquina.':'próxima semana fora da máquina: '+semanas[nx].txt+'.'))+'</p>';
+el.innerHTML=h;
+}
+function resumo(){
+var c=nomes.map(function(){return [0,0,0,0,0,0];});
+semanas.forEach(function(s){getEscala(s.g).forEach(function(p,k){c[p][k]++;});});
+document.getElementById('resumo').innerHTML='<table class="rs"><thead><tr><th>Pessoa</th>'+maqs.map(function(m){return '<th>'+esc(m)+'</th>';}).join('')+'</tr></thead><tbody>'+nomes.map(function(n,i){return '<tr><td><span class="pn">'+avatar(i,22)+esc(n)+'</span></td>'+c[i].map(function(v){return '<td>'+v+'</td>';}).join('')+'</tr>';}).join('')+'</tbody></table>';
+}
+function desenhaSwap(){
+var a=document.getElementById('swa'),b=document.getElementById('swb');
+if(!a||!b)return;
+a.innerHTML=opcoes(nomes,0);b.innerHTML=opcoes(nomes,1);
+}
+function desenhaMqs(){
+var el=document.getElementById('mqs');
+el.innerHTML=mq.map(function(m,i){return '<div><label>Máquina '+(i+1)+'</label><input data-i="'+i+'" maxlength="20" value="'+esc(m)+'"></div>';}).join('');
+el.querySelectorAll('input').forEach(function(inp){inp.addEventListener('input',function(){
+var i=parseInt(inp.getAttribute('data-i'),10);
+mq[i]=inp.value.trim()||('Máq. '+(i+1));aplicaMq();salvar();cabecalho();desenhaTabela();desenhaNomes();
+});});
+}
+function aplica(d){
+guarda();
+if(d.nomes&&d.nomes.length===6)ST[2].nomes=d.nomes;
+ST[2].ajustes=d.ajustes||{};
+ST[1].ajustes=(d.t1&&d.t1.ajustes)||{};
+obs=d.obs||{};
+if(d.maq&&d.maq.length===4){mq=d.maq;aplicaMq();}
+carrega(turno);
+}
+function redesenha(){desenhaNomes();desenhaSelect();desenhaTabela();cabecalho();desenhaMqs();atualizaSync();}
+document.getElementById('swgo').addEventListener('click',function(){
+var a=parseInt(document.getElementById('swa').value,10),b=parseInt(document.getElementById('swb').value,10);
+if(a===b)return;
+var l=getEscala(semSel).slice(),ia=l.indexOf(a),ib=l.indexOf(b);
+l[ia]=b;l[ib]=a;ajustes[semSel]=l;
+salvar();desenhaNomes();desenhaTabela();
+});
+document.getElementById('bzap').addEventListener('click',function(){
+var s=semanas[semSel],e=getEscala(semSel);
+var t='*Escala de Operadores – Turno '+turno+'*\nSemana '+s.txt+'\n'+e.slice(0,5).map(function(p,k){return maqs[k]+': '+nomes[p];}).join('\n')+'\nFora da máquina: '+nomes[e[5]];
+window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank');
+});
+document.getElementById('bprint').addEventListener('click',function(){window.print();});
+var pubT=null,semPub=false,emEnvio=false;
+function publica(){
+if(semPub)return;
+clearTimeout(pubT);emEnvio=true;sync('Salvando para todos…');
+pubT=setTimeout(function(){
+fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipo:'dados',conteudo:estado()})}).then(function(r){
+if(!r.ok)return Promise.reject(r.status);
+return r.json();
+}).then(function(){
+emEnvio=false;snap=JSON.stringify(estado());salvaExtra();sync('Salvo! Todos veem em 1 a 2 minutos.');
+}).catch(function(e){
+emEnvio=false;sync(e===403?'Este site não tem permissão para salvar para todos.':(e===413?'Dados grandes demais para salvar.':'Não foi possível salvar para todos. Só funciona na página hospedada no GitHub Pages.'));
+});
+},800);
+}
 desenhaMes();desenhaSemana();desenhaNomes();desenhaSelect();desenhaTabela();
+cabecalho();desenhaMqs();atualizaSync();
+fetch('dados.json?v='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(d){
+if(!d)return;
+aplica(d);semPub=true;salvar();semPub=false;redesenha();
+}).catch(function(){});
+function rotuloTurno(){var b=document.getElementById('bturno');if(b)b.textContent='Turno '+turno;}
+document.getElementById('bturno').addEventListener('click',function(){
+guarda();carrega(turno===2?1:2);pickerSel=-1;
+try{localStorage.setItem('turno-escala',String(turno));}catch(e){}
+desenhaPicker();redesenha();rotuloTurno();
+});
+rotuloTurno();
+function atualizaRemoto(){
+if(emEnvio)return;
+fetch('dados.json?v='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(d){
+if(!d||emEnvio)return;
+var antes=JSON.stringify(estado());
+aplica(d);
+if(JSON.stringify(estado())===antes)return;
+semPub=true;salvar();semPub=false;redesenha();
+}).catch(function(){});
+}
+setInterval(atualizaRemoto,60000);
+document.addEventListener('visibilitychange',function(){if(!document.hidden)atualizaRemoto();});
 function ghm(t){var e=document.getElementById('ghmsg');if(e)e.textContent=t;}
 function ghEnviar(i,file){
 ghm('Enviando…');
@@ -310,16 +456,15 @@ var f=ev.target.files&&ev.target.files[0];
 if(!f||pickerSel<0)return;
 ghEnviar(pickerSel,f);
 });
-// Avatares compartilhados: imagens na pasta avatares/ do repositório (lucas.png, michelle.png, ...)
-var slugs=['lucas','michelle','claudio','alex','alexandre','alice'],exts=['png','jpg','jpeg','webp'];
-function detecta(i,e){
+var exts=['png','jpg','jpeg','webp'];
+function detecta(tt,i,e){
 if(e>=exts.length)return;
-var im=new Image(),u='avatares/'+slugs[i]+'.'+exts[e];
-im.onload=function(){repo[i]=u;desenhaNomes();desenhaTabela();};
-im.onerror=function(){detecta(i,e+1);};
+var im=new Image(),u='avatares/'+SLUGS[tt][i]+'.'+exts[e];
+im.onload=function(){ST[tt].repo[i]=u;desenhaNomes();desenhaTabela();};
+im.onerror=function(){detecta(tt,i,e+1);};
 im.src=u;
 }
-for(var q=0;q<6;q++)detecta(q,0);
+for(var tt=2;tt>=1;tt--)for(var q=0;q<6;q++)detecta(tt,q,0);
 </script>
 </body>
 </html>

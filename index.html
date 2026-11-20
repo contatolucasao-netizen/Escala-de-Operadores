@@ -192,10 +192,10 @@ try{var s7=localStorage.getItem('maq-v1');if(s7){var m7=JSON.parse(s7);if(m7&&m7
 try{var s8=localStorage.getItem('snap-v1');if(s8)snap=s8;}catch(e){}
 function aplicaMq(){for(var i=0;i<4;i++)maqs[i]=mq[i];}
 aplicaMq();
-var turno=2,ST={},padrao1=['Joyce','Deangeles','Daniele','Wesley','Matheus','Marciane'];
+var oculta={},turno=2,ST={},padrao1=['Joyce','Deangeles','Daniele','Wesley','Matheus','Marciane'];
 var SLUGS={2:['lucas','michelle','claudio','alex','alexandre','alice'],1:['joyce','deangeles','daniele','wesley','matheus','marciane']},slugs=SLUGS[2];
-function guarda(){ST[turno]={nomes:nomes,ajustes:ajustes,avs:avs,fotos:fotos,repo:repo,eu:eu};}
-function carrega(t){var s=ST[t];nomes=s.nomes;ajustes=s.ajustes;avs=s.avs;fotos=s.fotos;repo=s.repo;eu=s.eu;slugs=SLUGS[t];turno=t;}
+function guarda(){ST[turno]={nomes:nomes,ajustes:ajustes,avs:avs,fotos:fotos,repo:repo,oculta:oculta,eu:eu};}
+function carrega(t){var s=ST[t];nomes=s.nomes;ajustes=s.ajustes;avs=s.avs;fotos=s.fotos;repo=s.repo;oculta=s.oculta;eu=s.eu;slugs=SLUGS[t];turno=t;}
 (function(){
 guarda();
 var s1={nomes:padrao1.slice(),ajustes:{},avs:avsPadrao.slice(),fotos:{},repo:{},eu:0};
@@ -204,10 +204,11 @@ try{var b=JSON.parse(localStorage.getItem('avatares-t1')||'null');if(b&&b.length
 try{var c=JSON.parse(localStorage.getItem('fotos-t1')||'null');if(c&&typeof c==='object')s1.fotos=c;}catch(e){}
 try{s1.eu=parseInt(localStorage.getItem('eu-t1'),10)||0;}catch(e){}
 ST[1]=s1;
+try{var oc=JSON.parse(localStorage.getItem('oculta-v1')||'null');if(oc){ST[2].oculta=oc[2]||{};s1.oculta=oc[1]||{};oculta=ST[2].oculta;}}catch(e){}
 var t0=null;try{t0=localStorage.getItem('turno-escala');}catch(e){}
 if(t0==='1')carrega(1);
 })();
-function estado(){guarda();return {nomes:ST[2].nomes,ajustes:ST[2].ajustes,obs:obs,maq:mq,t1:{ajustes:ST[1].ajustes}};}
+function estado(){guarda();return {nomes:ST[2].nomes,ajustes:ST[2].ajustes,obs:obs,maq:mq,oculta:ST[2].oculta,t1:{ajustes:ST[1].ajustes,oculta:ST[1].oculta}};}
 function sujo(){return JSON.stringify(estado())!==snap;}
 function sync(t){var e=document.getElementById('sync');if(e)e.textContent=t;}
 function atualizaSync(){}
@@ -215,7 +216,7 @@ function salvaExtra(){try{localStorage.setItem('obs-v1',JSON.stringify(obs));loc
 
 function getEscala(g){return ajustes[g]||base[g];}
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]});}
-function salvar(){guarda();salvaExtra();try{localStorage.setItem('nomes-escala',JSON.stringify(ST[2].nomes));localStorage.setItem('ajustes-v3',JSON.stringify(ST[2].ajustes));localStorage.setItem('eu-escala',String(ST[2].eu));localStorage.setItem('fotos-v1',JSON.stringify(ST[2].fotos));localStorage.setItem('avatares-v3',JSON.stringify(ST[2].avs));localStorage.setItem('ajustes-t1',JSON.stringify(ST[1].ajustes));localStorage.setItem('eu-t1',String(ST[1].eu));localStorage.setItem('fotos-t1',JSON.stringify(ST[1].fotos));localStorage.setItem('avatares-t1',JSON.stringify(ST[1].avs));localStorage.setItem('turno-escala',String(turno));}catch(e){}publica();}
+function salvar(){guarda();salvaExtra();try{localStorage.setItem('nomes-escala',JSON.stringify(ST[2].nomes));localStorage.setItem('ajustes-v3',JSON.stringify(ST[2].ajustes));localStorage.setItem('eu-escala',String(ST[2].eu));localStorage.setItem('fotos-v1',JSON.stringify(ST[2].fotos));localStorage.setItem('avatares-v3',JSON.stringify(ST[2].avs));localStorage.setItem('ajustes-t1',JSON.stringify(ST[1].ajustes));localStorage.setItem('eu-t1',String(ST[1].eu));localStorage.setItem('fotos-t1',JSON.stringify(ST[1].fotos));localStorage.setItem('avatares-t1',JSON.stringify(ST[1].avs));localStorage.setItem('turno-escala',String(turno));localStorage.setItem('oculta-v1',JSON.stringify({2:ST[2].oculta,1:ST[1].oculta}));}catch(e){}publica();}
 
 function iniciais(i){var p=String(nomes[i]).trim().split(/\s+/);return ((p[0]||'?').charAt(0)+(p[1]?p[1].charAt(0):'')).toUpperCase();}
 function avatar(i,t){return '<span data-av="'+i+'" style="display:inline-flex;cursor:zoom-in;border-radius:50%;flex:none">'+avatar0(i,t)+'</span>';}
@@ -225,7 +226,7 @@ function img(u){return '<img class="av" alt="" style="'+st+'" src="'+esc(u)+'">'
 if(m==='foto'&&fotos[i])return img(fotos[i]);
 if(m==='ini')return '<span class="av" style="'+st+'background:'+cores[i]+';font-size:'+Math.round(t*0.38)+'px">'+esc(iniciais(i))+'</span>';
 if(typeof m==='number'&&presets[m])return faceHTML(m,t);
-if(repo[i])return img(repo[i]);
+if(repo[i]&&!oculta[i])return img(repo[i]);
 return faceHTML(i%presets.length,t);
 }
 
@@ -278,7 +279,7 @@ var h='<label>Avatar de '+esc(nomes[i])+'</label><div class="pgrid">';
 presets.forEach(function(p,k){
 h+='<button type="button" class="pk'+(avs[i]===k?' sel':'')+'" data-k="'+k+'" aria-label="Avatar '+(k+1)+'">'+faceHTML(k,40)+'</button>';
 });
-h+='</div><button type="button" class="pa" id="pauto">Padrão</button><button type="button" class="pa" id="pini">Usar iniciais</button><button type="button" class="pa" id="pgh">Enviar Imagem</button><button type="button" class="pa" id="pfim">Fechar</button><div class="note" id="ghmsg"></div>';
+h+='</div><button type="button" class="pa" id="pauto">Padrão</button><button type="button" class="pa" id="pini">Usar iniciais</button><button type="button" class="pa" id="pgh">Enviar Imagem</button>'+((avs[i]==='foto'&&fotos[i])||(repo[i]&&!oculta[i])?'<button type="button" class="pa" id="prm">Remover imagem</button>':'')+'<button type="button" class="pa" id="pfim">Fechar</button><div class="note" id="ghmsg"></div>';
 pk.innerHTML=h;pk.style.display='block';
 pk.querySelectorAll('.pk').forEach(function(b){
 b.addEventListener('click',function(){avs[i]=parseInt(b.getAttribute('data-k'),10);salvar();desenhaNomes();desenhaTabela();desenhaPicker();});
@@ -286,6 +287,7 @@ b.addEventListener('click',function(){avs[i]=parseInt(b.getAttribute('data-k'),1
 document.getElementById('pauto').addEventListener('click',function(){avs[i]=null;salvar();desenhaNomes();desenhaTabela();desenhaPicker();});
 document.getElementById('pini').addEventListener('click',function(){avs[i]='ini';salvar();desenhaNomes();desenhaTabela();desenhaPicker();});
 document.getElementById('pgh').addEventListener('click',function(){if(!PROXY_URL){ghm('O envio para o GitHub ainda não foi configurado.');return;}document.getElementById('arqgh').click();});
+var rm=document.getElementById('prm');if(rm)rm.addEventListener('click',function(){avs[i]=null;delete fotos[i];if(repo[i])oculta[i]=true;salvar();desenhaNomes();desenhaTabela();desenhaPicker();});
 document.getElementById('pfim').addEventListener('click',function(){pickerSel=-1;desenhaPicker();});
 }
 function desenhaSelect(){
@@ -371,6 +373,7 @@ guarda();
 if(d.nomes&&d.nomes.length===6)ST[2].nomes=d.nomes;
 ST[2].ajustes=d.ajustes||{};
 ST[1].ajustes=(d.t1&&d.t1.ajustes)||{};
+ST[2].oculta=d.oculta||{};ST[1].oculta=(d.t1&&d.t1.oculta)||{};
 obs=d.obs||{};
 if(d.maq&&d.maq.length===4){mq=d.maq;aplicaMq();}
 carrega(turno);
@@ -510,7 +513,7 @@ fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:
 if(!r.ok)return Promise.reject(r.status);
 return r.json();
 }).then(function(){
-repo[i]=data;avs[i]=null;salvar();desenhaNomes();desenhaTabela();desenhaPicker();
+repo[i]=data;avs[i]=null;delete oculta[i];salvar();desenhaNomes();desenhaTabela();desenhaPicker();
 ghm('Salvo! Todos veem a nova imagem em 1 a 2 minutos.');
 }).catch(function(e){
 var t='Não foi possível enviar.';

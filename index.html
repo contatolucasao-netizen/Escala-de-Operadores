@@ -208,7 +208,8 @@ try{var oc=JSON.parse(localStorage.getItem('oculta-v1')||'null');if(oc){ST[2].oc
 var t0=null;try{t0=localStorage.getItem('turno-escala');}catch(e){}
 if(t0==='1')carrega(1);
 })();
-function estado(){guarda();return {nomes:ST[2].nomes,ajustes:ST[2].ajustes,obs:obs,maq:mq,oculta:ST[2].oculta,t1:{ajustes:ST[1].ajustes,oculta:ST[1].oculta}};}
+function pubAvs(a){return a.map(function(x){return x==='foto'?null:x;});}
+function estado(){guarda();return {nomes:ST[2].nomes,ajustes:ST[2].ajustes,obs:obs,maq:mq,oculta:ST[2].oculta,avs:pubAvs(ST[2].avs),t1:{ajustes:ST[1].ajustes,oculta:ST[1].oculta,avs:pubAvs(ST[1].avs)}};}
 function sujo(){return JSON.stringify(estado())!==snap;}
 function sync(t){var e=document.getElementById('sync');if(e)e.textContent=t;}
 function atualizaSync(){}
@@ -287,8 +288,15 @@ b.addEventListener('click',function(){avs[i]=parseInt(b.getAttribute('data-k'),1
 document.getElementById('pauto').addEventListener('click',function(){avs[i]=null;salvar();desenhaNomes();desenhaTabela();desenhaPicker();});
 document.getElementById('pini').addEventListener('click',function(){avs[i]='ini';salvar();desenhaNomes();desenhaTabela();desenhaPicker();});
 document.getElementById('pgh').addEventListener('click',function(){if(!PROXY_URL){ghm('O envio para o GitHub ainda não foi configurado.');return;}document.getElementById('arqgh').click();});
-var rm=document.getElementById('prm');if(rm)rm.addEventListener('click',function(){avs[i]=null;delete fotos[i];if(repo[i])oculta[i]=true;salvar();desenhaNomes();desenhaTabela();desenhaPicker();});
+var rm=document.getElementById('prm');if(rm)rm.addEventListener('click',function(){avs[i]=sorteiaAvatar(i);delete fotos[i];if(repo[i])oculta[i]=true;salvar();desenhaNomes();desenhaTabela();desenhaPicker();});
 document.getElementById('pfim').addEventListener('click',function(){pickerSel=-1;desenhaPicker();});
+}
+function sorteiaAvatar(i){
+var uso={};
+for(var k=0;k<6;k++){if(k===i)continue;var v=(typeof avs[k]==='number')?avs[k]:((avs[k]==null&&!(repo[k]&&!oculta[k]))?k%presets.length:-1);if(v>=0)uso[v]=1;}
+var l=[];for(var p=0;p<presets.length;p++)if(!uso[p])l.push(p);
+if(!l.length)for(var q=0;q<presets.length;q++)l.push(q);
+return l[Math.floor(Math.random()*l.length)];
 }
 function desenhaSelect(){
 var sel=document.getElementById('eu');sel.innerHTML='';
@@ -374,6 +382,8 @@ if(d.nomes&&d.nomes.length===6)ST[2].nomes=d.nomes;
 ST[2].ajustes=d.ajustes||{};
 ST[1].ajustes=(d.t1&&d.t1.ajustes)||{};
 ST[2].oculta=d.oculta||{};ST[1].oculta=(d.t1&&d.t1.oculta)||{};
+if(d.avs&&d.avs.length===6)ST[2].avs=d.avs;
+if(d.t1&&d.t1.avs&&d.t1.avs.length===6)ST[1].avs=d.t1.avs;
 obs=d.obs||{};
 if(d.maq&&d.maq.length===4){mq=d.maq;aplicaMq();}
 carrega(turno);

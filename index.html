@@ -10,10 +10,12 @@
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12151c;--card:#1b2029;--text:#e8eaf0;--muted:#9aa3b5;--accent:#6b9bff;--off:#4a3412;--offt:#ffd9a0;--cur:#20304f;--border:#2a3040}}
 :root[data-theme="dark"]{--bg:#12151c;--card:#1b2029;--text:#e8eaf0;--muted:#9aa3b5;--accent:#6b9bff;--off:#4a3412;--offt:#ffd9a0;--cur:#20304f;--border:#2a3040}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%;text-size-adjust:100%}
+*{-webkit-tap-highlight-color:transparent}
+button,select,input{touch-action:manipulation}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Apple Color Emoji","Segoe UI Emoji",sans-serif;line-height:1.45}
-main{max-width:960px;margin:0 auto;padding:22px 14px 48px}
+main{max-width:960px;margin:0 auto;padding:22px 14px 48px;padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px))}
 h1{margin:0 0 4px;font-size:1.6rem}
 h2{font-size:1.05rem;margin:0 0 10px}
 .sub{color:var(--muted);margin:0 0 16px}
@@ -63,6 +65,29 @@ table.rs{min-width:0}.rs td,.rs th{padding:6px;font-size:.82rem}
 .stage{position:relative;width:256px;height:256px;margin:12px auto;overflow:hidden;border-radius:8px;touch-action:none}
 .stage canvas{display:block;cursor:grab}
 .stage .mask{position:absolute;inset:0;border-radius:50%;box-shadow:0 0 0 400px rgba(0,0,0,.5);pointer-events:none}
+@media (max-width:640px){
+main{padding-top:14px}
+h1{font-size:1.35rem}
+.card{padding:12px}
+input,select,textarea{font-size:16px}
+button,select,input:not([type=range]){min-height:44px}
+.fld,.top{max-width:100%}
+.bar button{flex:1 1 auto}
+.prow{grid-template-columns:40px 1fr}.prow select{grid-column:1/-1}
+.hj{flex-direction:column;gap:8px}
+.sw>div,.sw select,.sw input,.sw button{flex:1 1 140px;width:100%}
+.mbox{max-height:92dvh;overscroll-behavior:contain}
+.scroll{overflow:visible}
+table,thead,tbody,tr,td{display:block;min-width:0}
+table{width:100%}
+thead{display:none}
+tr{border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden}
+td{display:flex;justify-content:space-between;align-items:center;gap:8px;text-align:left;padding:9px 12px}
+td::before{content:attr(data-l);color:var(--muted);font-size:.78rem;font-weight:600;text-transform:uppercase}
+td.sem{display:block;font-weight:700}td.sem::before{content:none}
+td.off::before{color:var(--offt)}
+tr.cur td{background:transparent}tr.cur td.sem{background:var(--cur)}tr.cur td.off{background:var(--off)}
+}
 @media print{.noprint{display:none!important}body{background:#fff;color:#000}.card{border:0}}
 </style>
 </head>
@@ -309,9 +334,9 @@ var html='';
 document.getElementById('titulo').textContent='Escala semanal – '+nomeMes(mesSel)+' · Turno '+turno;
 semanasDoMes(mesSel).forEach(function(sm,idx){
 var e=getEscala(sm.g),folga=e[5],op=e.slice(0,5),agora=(sm.g===cur);
-html+='<tr'+(agora?' class="cur"':'')+'><td><b>Sem. '+(idx+1)+'</b><br><span style="color:var(--muted);font-size:.8rem">'+esc(sm.txt)+'</span>'+(agora?'<span class="tag">agora</span>':'')+'</td>';
-op.forEach(function(p){html+='<td'+(p===eu?' class="me"':'')+'><span class="pn">'+avatar(p,26)+esc(nomes[p])+'</span></td>';});
-html+='<td class="off'+(folga===eu?' me':'')+'"><span class="pn">'+avatar(folga,26)+esc(nomes[folga])+'</span></td></tr>';
+html+='<tr'+(agora?' class="cur"':'')+'><td class="sem"><b>Sem. '+(idx+1)+'</b><br><span style="color:var(--muted);font-size:.8rem">'+esc(sm.txt)+'</span>'+(agora?'<span class="tag">agora</span>':'')+'</td>';
+op.forEach(function(p,k){html+='<td data-l="'+esc(k<4?mq[k]:'Avalanche')+'"'+(p===eu?' class="me"':'')+'><span class="pn">'+avatar(p,26)+esc(nomes[p])+'</span></td>';});
+html+='<td data-l="Fora da Máquina" class="off'+(folga===eu?' me':'')+'"><span class="pn">'+avatar(folga,26)+esc(nomes[folga])+'</span></td></tr>';
 });
 document.getElementById('corpo').innerHTML=html;
 hoje();desenhaFeriados();
@@ -430,17 +455,20 @@ try{localStorage.setItem('turno-escala',String(turno));}catch(e){}
 desenhaPicker();redesenha();rotuloTurno();
 });
 rotuloTurno();
+function ocupado(){return document.getElementById('pop').classList.contains('on')||document.getElementById('ed').classList.contains('on')||pickerSel>=0;}
 function atualizaRemoto(){
-if(emEnvio)return;
+if(emEnvio||ocupado())return;
 fetch('dados.json?v='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(d){
 if(!d||emEnvio)return;
+var n=new Date();sync('Atualizado às '+p2(n.getHours())+':'+p2(n.getMinutes()));
 var antes=JSON.stringify(estado());
 aplica(d);
 if(JSON.stringify(estado())===antes)return;
 semPub=true;salvar();semPub=false;redesenha();
 }).catch(function(){});
+var v=Date.now();for(var tt2=2;tt2>=1;tt2--)for(var q2=0;q2<6;q2++)detecta(tt2,q2,0,v);
 }
-setInterval(atualizaRemoto,60000);
+setInterval(atualizaRemoto,180000);
 document.addEventListener('visibilitychange',function(){if(!document.hidden)atualizaRemoto();});
 var POP=-1;
 function abrirPopup(i){
@@ -543,14 +571,15 @@ if(!f||pickerSel<0)return;
 abreEditor(pickerSel,f);
 });
 var exts=['png','jpg','jpeg','webp'];
-function detecta(tt,i,e){
+function detecta(tt,i,e,v){
 if(e>=exts.length)return;
-var im=new Image(),u='avatares/'+SLUGS[tt][i]+'.'+exts[e];
-im.onload=function(){ST[tt].repo[i]=u;desenhaNomes();desenhaTabela();};
-im.onerror=function(){detecta(tt,i,e+1);};
+var im=new Image(),u='avatares/'+SLUGS[tt][i]+'.'+exts[e]+(v?'?v='+v:'');
+im.onload=function(){ST[tt].repo[i]=u;if(tt===turno){desenhaNomes();desenhaTabela();}};
+im.onerror=function(){detecta(tt,i,e+1,v);};
 im.src=u;
 }
 for(var tt=2;tt>=1;tt--)for(var q=0;q<6;q++)detecta(tt,q,0);
+(function(){try{var c=document.createElement('canvas');c.width=c.height=180;var x=c.getContext('2d');x.fillStyle='#2563eb';x.fillRect(0,0,180,180);x.font='96px sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText('🏭',90,96);var u=c.toDataURL('image/png');['apple-touch-icon','icon'].forEach(function(r){var l=document.createElement('link');l.rel=r;l.href=u;document.head.appendChild(l);});}catch(e){}})();
 </script>
 </body>
 </html>

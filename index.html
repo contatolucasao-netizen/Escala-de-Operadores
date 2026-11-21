@@ -20,8 +20,10 @@ h1{margin:0 0 4px;font-size:1.6rem}
 h2{font-size:1.05rem;margin:0 0 10px}
 .sub{color:var(--muted);margin:0 0 16px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px}
-.names{display:grid;gap:8px}
-.prow{display:grid;grid-template-columns:40px minmax(max-content,1.5fr) minmax(0,1fr);gap:8px;align-items:center}
+.names{display:grid;gap:0}
+.prow{display:grid;grid-template-columns:40px 1fr auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--border)}
+.prow:first-child{border-top:0}
+.prow select{width:auto;min-width:132px;padding:7px 8px;font-size:.9rem}
 input,select,button{width:100%;padding:9px 10px;font-size:.95rem;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text)}
 .top select{background:var(--card);font-weight:600}
 button{width:auto;cursor:pointer;margin-top:12px}
@@ -55,6 +57,14 @@ td.me{outline:2px solid var(--accent);outline-offset:-2px;font-weight:700}
 .ghbox textarea{width:100%;min-height:90px;font-size:.72rem;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);padding:8px}
 .ghbox a{color:var(--accent)}
 summary{cursor:pointer;font-size:.92rem}
+.filtros{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.filtros select{background:var(--card);font-weight:600}
+.eqh{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}.eqh h2{margin:0}
+.turno{margin:0;font-weight:700;background:var(--cur);color:var(--accent);border-color:transparent;border-radius:999px;padding:6px 16px}
+.card .fld{max-width:none;margin-bottom:6px}
+.mais{margin-top:12px;border-top:1px solid var(--border);padding-top:10px;color:var(--muted)}
+.mais h3{font-size:.8rem;margin:14px 0 0;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.note:empty{display:none}
 .bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}.bar button{margin:0}
 .fer{display:block;font-size:.72rem;color:var(--offt)}
 .hj{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:8px}.hj span{display:inline-flex;align-items:center;gap:6px}
@@ -73,7 +83,7 @@ input,select,textarea{font-size:16px}
 button,select,input:not([type=range]){min-height:44px}
 .fld,.top{max-width:100%}
 .bar button{flex:1 1 auto}
-.prow{grid-template-columns:40px 1fr}.prow select{grid-column:1/-1}
+.prow select{width:128px;min-width:0;font-size:16px}
 .hj{flex-direction:column;gap:8px}
 .sw>div,.sw select,.sw input,.sw button{flex:1 1 140px;width:100%}
 .mbox{max-height:92dvh;overscroll-behavior:contain}
@@ -98,23 +108,22 @@ tr.cur td{background:transparent}tr.cur td.sem{background:var(--cur)}tr.cur td.o
 
 <div class="card noprint" id="hoje"></div>
 
-<div class="fld top noprint"><label for="mes">Mês</label><select id="mes"></select></div>
+<div class="filtros noprint"><div><label for="mes">Mês</label><select id="mes"></select></div><div><label for="eu">Quem é você?</label><select id="eu"></select></div></div>
 
 <div class="card noprint">
-<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px"><h2 style="margin:0">Equipe: nome e máquina na semana</h2><button id="bturno" type="button" style="margin:0;font-weight:700;background:var(--cur);color:var(--accent);border-color:var(--accent)">Turno 2</button></div>
+<div class="eqh"><h2>Equipe</h2><button id="bturno" type="button" class="turno">Turno 2</button></div>
 <div class="fld"><label for="semana">Semana</label><select id="semana"></select></div>
 <div class="names" id="names"></div>
 <div class="picker" id="picker"></div>
 <input type="file" id="arq" accept="image/*" style="display:none">
 <input type="file" id="arqgh" accept="image/*" style="display:none">
-<details style="margin-top:12px"><summary>Trocar duas pessoas na semana</summary>
-<div class="sw"><div><label for="swa">Pessoa A</label><select id="swa"></select></div><div><label for="swb">Pessoa B</label><select id="swb"></select></div><button type="button" id="swgo">Trocar</button></div></details>
-<details style="margin-top:8px"><summary>Nomes das máquinas</summary><div class="sw" id="mqs"></div></details>
+<details class="mais"><summary>Mais opções</summary>
+<h3>Trocar duas pessoas na semana</h3>
+<div class="sw"><div><label for="swa">Pessoa A</label><select id="swa"></select></div><div><label for="swb">Pessoa B</label><select id="swb"></select></div><button type="button" id="swgo">Trocar</button></div>
+<h3>Nomes das máquinas</h3>
+<div class="sw" id="mqs"></div>
+</details>
 
-<div style="margin-top:12px;max-width:260px">
-<label for="eu">Quem é você? (destaca na tabela)</label>
-<select id="eu"></select>
-</div>
 <p class="note" id="sync"></p>
 </div>
 
